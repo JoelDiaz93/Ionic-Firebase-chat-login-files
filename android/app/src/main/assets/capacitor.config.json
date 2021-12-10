@@ -1,0 +1,6 @@
+{
+	"appId": "com.example.app",
+	"appName": "ionic-firebase-chat",
+	"webDir": "www",
+	"bundledWebRuntime": false
+}

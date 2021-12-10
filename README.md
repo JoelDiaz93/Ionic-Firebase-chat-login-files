@@ -1,16 +1,24 @@
-﻿# Ionic-Firebase-chat-login-files
-
-## Escula Politécnica Nacional
-
-### Integrantes: Díaz Carlos, Maya Ruben, Vasconez John, Yépez Alexis
-
-#### Aplicacion de chat en Ionic y Firebase
+﻿## Escula Politécnica Nacional
+# Ionic-Firebase-chat-login-files
 
 El funcionamiento de esta aplicacion de Ionic permite realizar un registro de usuarios con verificacion de email, de esta manera valiadndo que se registre cada usuario con un email verdadero, tambien cuenta con recuperacion de contraseña la cual envia un link al correo del usuario regsitrado de tal manera que pueda acceder a esta para realizar un cambio de contraseña y pueda ingresar nuevamente a la aplicacion. En el dashboar cuenta con una sala de conversacion general donde todos los usuarios registrados pueden enviar mensajes y cualquier tiepo de archivo. Todo esto es almacenado en firebase, tanto como los mensajes en una base de datos en teimpo real y en un almacenamiento de archivos proporcionado por Firebase.
 
-Despues de clonar el repositorio, es necesario que ejecutes 
--- npm install
+## Comenzando 🚀
+Debes tener instalado node.js y ionic.
+Clona este repositorio:
 
+``` git clone https://github.com/JoelDiaz93/Ionic-Firebase-chat-login-files.git
+
+### Instalación 🔧
+Despues instala las dependencias necesarias para su funcionamiento
+``` npm install
+
+Para ejecutar en el navegador
+``` ionic serve
+
+### Integrantes: Díaz Carlos, Maya Ruben, Vasconez John, Yépez Alexis
+
+### Codificación ⌨️
 La aplicacion en cuestion tiene las funciones de:
 Se utilizaron las siguiente librerias en app modules
 
