@@ -2,9 +2,9 @@
 
 ## Escula Politécnica Nacional
 
-###Integrantes: Díaz Carlos, Maya Ruben, Vasconez John, Yépez Alexis
+### Integrantes: Díaz Carlos, Maya Ruben, Vasconez John, Yépez Alexis
 
-####Aplicacion de chat en Ionic y Firebase
+#### Aplicacion de chat en Ionic y Firebase
 
 La aplicacion en cuestion tiene las funciones de:
 Se utilizaron las siguiente librerias en app modules
