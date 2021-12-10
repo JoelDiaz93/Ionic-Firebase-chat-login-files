@@ -6,6 +6,11 @@
 
 #### Aplicacion de chat en Ionic y Firebase
 
+El funcionamiento de esta aplicacion de Ionic permite realizar un registro de usuarios con verificacion de email, de esta manera valiadndo que se registre cada usuario con un email verdadero, tambien cuenta con recuperacion de contraseña la cual envia un link al correo del usuario regsitrado de tal manera que pueda acceder a esta para realizar un cambio de contraseña y pueda ingresar nuevamente a la aplicacion. En el dashboar cuenta con una sala de conversacion general donde todos los usuarios registrados pueden enviar mensajes y cualquier tiepo de archivo. Todo esto es almacenado en firebase, tanto como los mensajes en una base de datos en teimpo real y en un almacenamiento de archivos proporcionado por Firebase.
+
+Despues de clonar el repositorio, es necesario que ejecutes 
+-- npm install
+
 La aplicacion en cuestion tiene las funciones de:
 Se utilizaron las siguiente librerias en app modules
 
