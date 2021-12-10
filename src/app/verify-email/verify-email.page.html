@@ -3,20 +3,29 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>verify-email</ion-title>
+    <ion-title>Verificar correo electronico</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ion-grid>
     <ion-row>
-      <h2>Ionic 5 Firebase Verify Email</h2>
-      <p>
-        Please check your email and click on the link to verfiy your email address.
-      </p>
-      <ion-button type="submit" (click)="authService.SendVerificationMail()" expand="block">
-        Resend Verification Email
-      </ion-button>
+      <ion-col sizeMd="4" offsetMd="4">
+        <ion-card-content class="ion-text-center">
+              <h1 color="danger">Verificacion de correo electronico</h1>
+              <p>
+                Por favor revise su correo electrónico y haga clic en el enlace
+                para verificar su dirección de correo electrónico.
+              </p>
+              <ion-button
+                type="submit"
+                (click)="authService.SendVerificationMail()"
+                expand="block"
+              >
+                Reenviar correo electronico
+              </ion-button>
+        </ion-card-content>
+      </ion-col>
     </ion-row>
   </ion-grid>
 </ion-content>
