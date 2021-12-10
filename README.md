@@ -7,14 +7,20 @@ El funcionamiento de esta aplicacion de Ionic permite realizar un registro de us
 Debes tener instalado node.js y ionic.
 Clona este repositorio:
 
-``` git clone https://github.com/JoelDiaz93/Ionic-Firebase-chat-login-files.git
+``` 
+git clone https://github.com/JoelDiaz93/Ionic-Firebase-chat-login-files.git
+``` 
 
 ### Instalación 🔧
 Despues instala las dependencias necesarias para su funcionamiento
-``` npm install
+```
+npm install
+``` 
 
 Para ejecutar en el navegador
-``` ionic serve
+``` 
+ionic serve
+``` 
 
 ### Integrantes: Díaz Carlos, Maya Ruben, Vasconez John, Yépez Alexis
 
