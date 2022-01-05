@@ -7,11 +7,12 @@ export const environment = {
   firebaseConfig: {
     apiKey: 'AIzaSyAvzKte8KqfB7RirdfxGw3n1XwaMBVILqA',
     authDomain: 'appchat2021-2bfd3.firebaseapp.com',
+    databaseURL: 'https://appchat2021-2bfd3-default-rtdb.firebaseio.com',
     projectId: 'appchat2021-2bfd3',
     storageBucket: 'appchat2021-2bfd3.appspot.com',
     messagingSenderId: '95415917580',
-    appId: '1:95415917580:web:70b6943725cb58c041e229',
-    measurementId: '${config.measurementId}',
+    appId: '1:95415917580:web:d6a0543b540496eb41e229',
+    measurementId: 'G-LEBZSPP2QG',
   },
 };
 
