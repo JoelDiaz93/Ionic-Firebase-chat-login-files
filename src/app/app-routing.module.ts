@@ -7,10 +7,10 @@ const routes: Routes = [
     redirectTo: 'login',
     pathMatch: 'full'
   },
-  {
-    path: 'folder/:id',
-    loadChildren: () => import('./folder/folder.module').then( m => m.FolderPageModule)
-  },
+  // {
+  //   path: 'folder/:id',
+  //   loadChildren: () => import('./folder/folder.module').then( m => m.FolderPageModule)
+  // },
   {
     path: 'registration',
     loadChildren: () => import('./registration/registration.module').then( m => m.RegistrationPageModule)
