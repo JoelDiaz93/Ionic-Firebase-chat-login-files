@@ -4,23 +4,41 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-card *ngFor="let chat of chats">
+  <ion-card *ngFor="let chat of chats.slice().reverse()">
     <ion-card-header> {{ chat.email }}: </ion-card-header>
-    <ion-card-content>
-      {{ chat.message }}
-      <img src="{{ chat.imageMessage }}" *ngIf="chat.imageMessage" />
+    <ion-card-content *ngIf='chat.message === "Mis coordenadas actuales son:"; else elseBlock'>
+          <ion-text color="primary">
+            <h2>{{chat.message}}</h2>
+          </ion-text>
+          <ion-text>
+            <span class="coordinates">Latitude: </span>
+            <span class="content-coordinates">{{chat.latitude}}</span>
+          </ion-text>
+          <br>
+          <ion-text>
+            <span class="coordinates">Longitude: </span>
+            <span class="content-coordinates">{{chat.longitude}}</span>
+          </ion-text>
     </ion-card-content>
+    <ng-template #elseBlock>
+      <ion-card-content>
+        {{chat.message}}
+      </ion-card-content>
+    </ng-template>
   </ion-card>
 </ion-content>
 <ion-footer>
   <ion-toolbar>
-    <ion-input placeholder="Enter text" [(ngModel)]="message"></ion-input>
+    <ion-input placeholder="Escriba un nuevo mensaje" [(ngModel)]="message" (keyup.enter)="sendMessage()"></ion-input>
     <ion-buttons slot="end">
-      Enviar
-      <ion-button (click)="sendMessage()">
-        <ion-icon name="send-outline"></ion-icon>
+      <ion-button (click)="sendMessage()" (keyup.enter)="auxFunction()">
+        Enviar
+        <ion-icon slot="end" name="send-sharp"></ion-icon>
       </ion-button>
-      <ion-button expand="full" (click)="buttonFile.click()">
+      <ion-button (click)="sendLocation()">
+        <ion-icon name="location-sharp"></ion-icon>
+      </ion-button>
+      <ion-button  (click)="buttonFile.click()">
         <ion-icon name="add-circle-outline"></ion-icon>
       </ion-button>
       <input
