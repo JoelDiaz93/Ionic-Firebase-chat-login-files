@@ -43,10 +43,13 @@
       </ion-button>
       <input
         type="file"
-        style="display: none;"
+        style="display: none"
         #buttonFile
         (change)="uploadImage($event.target.files)"
       />
+      <ion-fab-button (click)="addPhotoToGallery()">
+        <ion-icon name="camera"></ion-icon>
+      </ion-fab-button>
     </ion-buttons>
   </ion-toolbar>
   <ion-footer (click)="logout()">
