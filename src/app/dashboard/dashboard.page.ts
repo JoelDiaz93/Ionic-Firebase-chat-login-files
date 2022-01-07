@@ -40,6 +40,8 @@ export class DashboardPage implements OnInit {
   tmpImage: any = undefined;
   encryptKey = '*/*-$%^@!@#';
 
+  newFile: any;
+
   // File upload task
   fileUploadTask: AngularFireUploadTask;
 
@@ -128,15 +130,7 @@ export class DashboardPage implements OnInit {
       this.chats = [];
       messageSnap.forEach((messageData) => {
         console.log('messageData', messageData.val());
-        if (messageData.val().message === 'Mis coordenadas actuales son:') {
-          //console.log("CADA OBJETO CONTIENE LA LOCALIZACION", messageData.val());
-          this.chats.push({
-            email: messageData.val().email,
-            message: messageData.val().message,
-            latitude: messageData.val().location.latitude,
-            longitude: messageData.val().location.longitude,
-          });
-        } else if (messageData.val().imageMessage) {
+        if (messageData.val().imageMessage) {
           this.chats.push({
             email: messageData.val().email,
             imageMessage: crypto.AES.decrypt(
@@ -144,6 +138,16 @@ export class DashboardPage implements OnInit {
               this.encryptKey
             ).toString(crypto.enc.Utf8),
             uid: messageData.val().uid,
+          });
+        } else if (
+          messageData.val().message === 'Mis coordenadas actuales son:'
+        ) {
+          //console.log("CADA OBJETO CONTIENE LA LOCALIZACION", messageData.val());
+          this.chats.push({
+            email: messageData.val().email,
+            message: messageData.val().message,
+            latitude: messageData.val().location.latitude,
+            longitude: messageData.val().location.longitude,
           });
         } else {
           this.chats.push({
@@ -195,7 +199,6 @@ export class DashboardPage implements OnInit {
     let messageToSend = {};
     if (this.tmpImage !== undefined) {
       messageToSend = {
-        location: '',
         uid: this.userID,
         email: this.userEmail,
         imageMessage: crypto.AES.encrypt(
@@ -209,7 +212,6 @@ export class DashboardPage implements OnInit {
         uid: this.userID,
         email: this.userEmail,
         message: crypto.AES.encrypt(this.message, this.encryptKey).toString(),
-        location: '',
       };
     }
     try {
@@ -220,47 +222,37 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  async uploadImage(event: FileList) {
+  async uploadFile(event: FileList) {
+    this.newFile = event.item(0);
+    const fileStoragePath = `chats/${new Date().getTime()}_${
+      this.newFile.name
+    }`;
+    if (event.item(0)) {
+      const reader = new FileReader();
+      reader.onload = async (fileUp) => {
+        // this.newProducto.foto = file.target.result as string;
+        console.log('ref: ', fileUp.target.result as string);
+        let messageToSend = {};
+        messageToSend = {
+          uid: this.userID,
+          email: this.userEmail,
+          imageMessage: crypto.AES.encrypt(
+            fileUp.target.result as string,
+            this.encryptKey
+          ).toString(),
+        };
+        this.tmpImage = undefined;
+        try {
+          await this.firebaseServ.sendMessage(messageToSend);
+          this.message = '';
+        } catch (e) {
+          console.log('error', e);
+        }
+      };
+      reader.readAsDataURL(event.item(0));
+    }
+
     const file = event.item(0);
-
-    // Image validation
-    // if (file.type.split('/')[0] !== 'image') {
-    //   console.log('File type is not supported!');
-    //   return;
-    // }
-
-    this.isFileUploading = true;
-    this.isFileUploaded = false;
-
-    this.imgName = file.name;
-
-    // Storage path
-    const fileStoragePath = `chats/${new Date().getTime()}_${file.name}`;
-    console.log('URLimage: ', fileStoragePath);
-    let messageToSend = {};
-    if (this.tmpImage !== undefined) {
-      messageToSend = {
-        uid: this.userID,
-        email: this.userEmail,
-        imageMessage: crypto.AES.encrypt(
-          fileStoragePath,
-          this.encryptKey
-        ).toString(),
-      };
-      this.tmpImage = undefined;
-    } else {
-      messageToSend = {
-        uid: this.userID,
-        email: this.userEmail,
-        message: crypto.AES.encrypt(this.message, this.encryptKey).toString(),
-      };
-    }
-    try {
-      await this.firebaseServ.sendMessage(messageToSend);
-      this.message = '';
-    } catch (e) {
-      console.log('error', e);
-    }
 
     // Image reference
     const imageRef = this.afStorage.ref(fileStoragePath);
@@ -311,6 +303,6 @@ export class DashboardPage implements OnInit {
   }
 
   addPhotoToGallery() {
-    this.photoService.addNewToGallery();
+    this.photoService.addNewToGallery(this.userID, this.userEmail);
   }
 }

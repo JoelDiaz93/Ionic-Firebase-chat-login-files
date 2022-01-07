@@ -27,6 +27,7 @@ import * as crypto from 'crypto-js';
 })
 export class PhotoService {
   public photos: UserPhoto[] = [];
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   private PHOTO_STORAGE = 'photos';
   private isFileUploading: boolean;
   private isFileUploaded: boolean;
@@ -134,82 +135,27 @@ export class PhotoService {
       });
   }
 
-  async uploadImage(cameraPhoto: Photo) {
+  async uploadImage(userID: string, userEmail: string, cameraPhoto: Photo) {
     const base64Data = await this.readAsBase64(cameraPhoto);
-    const fileName = new Date().getTime() + '.jpeg';
+    // const convertedImage = 'data:image/jpeg;base64,'+base64Data;
+    // const fileName = cameraPhoto.webPath;
 
-    // Image validation
-    // if (file.type.split('/')[0] !== 'image') {
-    //   console.log('File type is not supported!');
-    //   return;
-    // }
-
-    this.isFileUploading = true;
-    this.isFileUploaded = false;
-
-    // Storage path
-    const fileStoragePath = `chats/${new Date().getTime()}_${fileName}`;
-    console.log('URLimage: ', fileStoragePath);
     let messageToSend = {};
-    if (this.tmpImage !== undefined) {
-      messageToSend = {
-        uid: this.userID,
-        email: this.userEmail,
-        imageMessage: crypto.AES.encrypt(
-          fileStoragePath,
-          this.encryptKey
-        ).toString(),
-      };
-      this.tmpImage = undefined;
-    } else {
-      messageToSend = {
-        uid: this.userID,
-        email: this.userEmail,
-        message: crypto.AES.encrypt(this.message, this.encryptKey).toString(),
-      };
-    }
+    messageToSend = {
+      uid: userID,
+      email: userEmail,
+      imageMessage: crypto.AES.encrypt(base64Data, this.encryptKey).toString(),
+    };
+    this.tmpImage = undefined;
     try {
       await this.firebaseServ.sendMessage(messageToSend);
       this.message = '';
     } catch (e) {
       console.log('error', e);
     }
-
-    // Image reference
-    const imageRef = this.afStorage.ref(fileStoragePath);
-
-    // File upload task
-    this.fileUploadTask = this.afStorage.upload(fileStoragePath, base64Data);
-
-    // Show uploading progress
-    this.percentageVal = this.fileUploadTask.percentageChanges();
-    this.trackSnapshot = this.fileUploadTask.snapshotChanges().pipe(
-      finalize(() => {
-        // Retreive uploaded image storage path
-        this.UploadedImageURL = imageRef.getDownloadURL();
-
-        this.UploadedImageURL.subscribe(
-          (resp) => {
-            this.storeFilesFirebase({
-              name: fileName,
-              filepath: resp,
-              size: this.fileSize,
-            });
-            this.isFileUploading = false;
-            this.isFileUploaded = true;
-          },
-          (error) => {
-            console.log(error);
-          }
-        );
-      }),
-      tap((snap) => {
-        this.fileSize = snap.totalBytes;
-      })
-    );
   }
 
-  public async addNewToGallery() {
+  public async addNewToGallery(userID: string, userEmail: string) {
     // Take a photo
     const capturedPhoto = await Camera.getPhoto({
       resultType: CameraResultType.Uri, // file-based data; provides best performance
@@ -218,7 +164,7 @@ export class PhotoService {
     });
 
     const savedImageFile = await this.savePicture(capturedPhoto);
-    await this.uploadImage(capturedPhoto);
+    await this.uploadImage(userID, userEmail, capturedPhoto);
 
     // Add new photo to Photos array
     this.photos.unshift(savedImageFile);
@@ -242,6 +188,55 @@ export class PhotoService {
       data: base64Data,
       directory: Directory.Data,
     });
+
+    console.log(fileName);
+
+    // Image validation
+    // if (file.type.split('/')[0] !== 'image') {
+    //   console.log('File type is not supported!');
+    //   return;
+    // }
+
+    this.isFileUploading = true;
+    this.isFileUploaded = false;
+
+    // Storage path
+    const fileStoragePath = `chats/${new Date().getTime()}.${fileName}`;
+    console.log('URLimage: ', fileStoragePath);
+
+    // Image reference
+    const imageRef = this.afStorage.ref(fileStoragePath);
+
+    // File upload task
+    this.fileUploadTask = this.afStorage.upload(fileStoragePath, savedFile);
+
+    // Show uploading progress
+    this.percentageVal = this.fileUploadTask.percentageChanges();
+    this.trackSnapshot = this.fileUploadTask.snapshotChanges().pipe(
+      finalize(() => {
+        // Retreive uploaded image storage path
+        this.UploadedImageURL = imageRef.getDownloadURL();
+
+        this.UploadedImageURL.subscribe(
+          async (resp) => {
+            this.storeFilesFirebase({
+              name: fileName,
+              filepath: resp,
+              size: this.fileSize,
+            });
+
+            this.isFileUploading = false;
+            this.isFileUploaded = true;
+          },
+          (error) => {
+            console.log(error);
+          }
+        );
+      }),
+      tap((snap) => {
+        this.fileSize = snap.totalBytes;
+      })
+    );
 
     if (this.platform.is('hybrid')) {
       // Display the new image by rewriting the 'file://' path to HTTP
@@ -272,6 +267,7 @@ export class PhotoService {
       return file.data;
     } else {
       // Fetch the photo, read as a blob, then convert to base64 format
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const response = await fetch(cameraPhoto.webPath!);
       const blob = await response.blob();
 
