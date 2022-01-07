@@ -141,5 +141,8 @@ Para los servicios de chat se utiliza las siguientes funciones:
 EL proyecto consta de 5 paginas y 2 servicios:
 
 ![image](https://user-images.githubusercontent.com/58042087/145654145-f9606dcb-1cac-491d-8fd6-d34917bb4b9b.png)
+La carga de los archimos en el chat
+![WhatsApp Image 2022-01-07 at 16 45 13](https://user-images.githubusercontent.com/28762154/148615421-054d3b6b-ec48-4af5-8775-af2f22142133.jpeg)
+
 
 Link de la explicacion en youtube: https://youtu.be/x72ZCEXztEw
