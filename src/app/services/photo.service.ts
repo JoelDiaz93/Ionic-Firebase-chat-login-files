@@ -9,6 +9,18 @@ import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Storage } from '@capacitor/storage';
 import { Platform } from '@ionic/angular';
+import { Observable } from 'rxjs';
+import {
+  AngularFireStorage,
+  AngularFireUploadTask,
+} from '@angular/fire/compat/storage';
+import {
+  AngularFirestore,
+  AngularFirestoreCollection,
+} from '@angular/fire/compat/firestore';
+import { finalize, tap } from 'rxjs/operators';
+import { FirebaseService } from '../shared/firebase.service';
+import * as crypto from 'crypto-js';
 
 @Injectable({
   providedIn: 'root',
@@ -16,8 +28,39 @@ import { Platform } from '@ionic/angular';
 export class PhotoService {
   public photos: UserPhoto[] = [];
   private PHOTO_STORAGE = 'photos';
+  private isFileUploading: boolean;
+  private isFileUploaded: boolean;
+  private imgName: string;
+  private fileSize: number;
+  private userID: string;
+  private userEmail: string;
+  private message: string;
+  private chats: any = [];
+  private tmpImage: any = undefined;
+  private encryptKey = '*/*-$%^@!@#';
+  private fileUploadTask: AngularFireUploadTask;
 
-  constructor(private platform: Platform) {}
+  // Upload progress
+  private percentageVal: Observable<number>;
+
+  // Track file uploading with snapshot
+  private trackSnapshot: Observable<any>;
+
+  // Uploaded File URL
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  private UploadedImageURL: Observable<string>;
+
+  // Uploaded image collection
+  private files: Observable<any[]>;
+
+  private filesCollection: AngularFirestoreCollection<ImgFile>;
+
+  constructor(
+    private platform: Platform,
+    private firebaseServ: FirebaseService,
+    private afs: AngularFirestore,
+    private afStorage: AngularFireStorage
+  ) {}
 
   public async loadSaved() {
     // Retrieve cached photo array data
@@ -47,6 +90,125 @@ export class PhotoService {
   // Store a reference to all photo filepaths using Storage API:
   // https://capacitor.ionicframework.com/docs/apis/storage
   */
+
+  // Delete picture by removing it from reference data and the filesystem
+  public async deletePicture(photo: UserPhoto, position: number) {
+    // Remove this photo from the Photos reference data array
+    this.photos.splice(position, 1);
+
+    // Update photos array cache by overwriting the existing photo array
+    Storage.set({
+      key: this.PHOTO_STORAGE,
+      value: JSON.stringify(this.photos),
+    });
+
+    // delete photo file from filesystem
+    const filename = photo.filepath.substr(photo.filepath.lastIndexOf('/') + 1);
+    await Filesystem.deleteFile({
+      path: filename,
+      directory: Directory.Data,
+    });
+  }
+
+  convertBlobToBase64 = (blob: Blob) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+      reader.readAsDataURL(blob);
+    });
+
+  storeFilesFirebase(file: any) {
+    const fileId = this.afs.createId();
+
+    this.filesCollection
+      .doc(fileId)
+      .set(file)
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  async uploadImage(cameraPhoto: Photo) {
+    const base64Data = await this.readAsBase64(cameraPhoto);
+    const fileName = new Date().getTime() + '.jpeg';
+
+    // Image validation
+    // if (file.type.split('/')[0] !== 'image') {
+    //   console.log('File type is not supported!');
+    //   return;
+    // }
+
+    this.isFileUploading = true;
+    this.isFileUploaded = false;
+
+    // Storage path
+    const fileStoragePath = `chats/${new Date().getTime()}_${fileName}`;
+    console.log('URLimage: ', fileStoragePath);
+    let messageToSend = {};
+    if (this.tmpImage !== undefined) {
+      messageToSend = {
+        uid: this.userID,
+        email: this.userEmail,
+        imageMessage: crypto.AES.encrypt(
+          fileStoragePath,
+          this.encryptKey
+        ).toString(),
+      };
+      this.tmpImage = undefined;
+    } else {
+      messageToSend = {
+        uid: this.userID,
+        email: this.userEmail,
+        message: crypto.AES.encrypt(this.message, this.encryptKey).toString(),
+      };
+    }
+    try {
+      await this.firebaseServ.sendMessage(messageToSend);
+      this.message = '';
+    } catch (e) {
+      console.log('error', e);
+    }
+
+    // Image reference
+    const imageRef = this.afStorage.ref(fileStoragePath);
+
+    // File upload task
+    this.fileUploadTask = this.afStorage.upload(fileStoragePath, base64Data);
+
+    // Show uploading progress
+    this.percentageVal = this.fileUploadTask.percentageChanges();
+    this.trackSnapshot = this.fileUploadTask.snapshotChanges().pipe(
+      finalize(() => {
+        // Retreive uploaded image storage path
+        this.UploadedImageURL = imageRef.getDownloadURL();
+
+        this.UploadedImageURL.subscribe(
+          (resp) => {
+            this.storeFilesFirebase({
+              name: fileName,
+              filepath: resp,
+              size: this.fileSize,
+            });
+            this.isFileUploading = false;
+            this.isFileUploaded = true;
+          },
+          (error) => {
+            console.log(error);
+          }
+        );
+      }),
+      tap((snap) => {
+        this.fileSize = snap.totalBytes;
+      })
+    );
+  }
+
   public async addNewToGallery() {
     // Take a photo
     const capturedPhoto = await Camera.getPhoto({
@@ -56,6 +218,7 @@ export class PhotoService {
     });
 
     const savedImageFile = await this.savePicture(capturedPhoto);
+    await this.uploadImage(capturedPhoto);
 
     // Add new photo to Photos array
     this.photos.unshift(savedImageFile);
@@ -115,38 +278,15 @@ export class PhotoService {
       return (await this.convertBlobToBase64(blob)) as string;
     }
   }
-
-  // Delete picture by removing it from reference data and the filesystem
-  public async deletePicture(photo: UserPhoto, position: number) {
-    // Remove this photo from the Photos reference data array
-    this.photos.splice(position, 1);
-
-    // Update photos array cache by overwriting the existing photo array
-    Storage.set({
-      key: this.PHOTO_STORAGE,
-      value: JSON.stringify(this.photos),
-    });
-
-    // delete photo file from filesystem
-    const filename = photo.filepath.substr(photo.filepath.lastIndexOf('/') + 1);
-    await Filesystem.deleteFile({
-      path: filename,
-      directory: Directory.Data,
-    });
-  }
-
-  convertBlobToBase64 = (blob: Blob) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = reject;
-      reader.onload = () => {
-        resolve(reader.result);
-      };
-      reader.readAsDataURL(blob);
-    });
 }
 
 export interface UserPhoto {
   filepath: string;
   webviewPath: string;
+}
+
+export interface ImgFile {
+  name: string;
+  filepath: string;
+  size: number;
 }
