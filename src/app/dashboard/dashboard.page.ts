@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { Observable } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
 import { AuthenticationService } from '../shared/authentication-service';
 import { NavController, ActionSheetController } from '@ionic/angular';
 import { FirebaseService } from '../shared/firebase.service';
+import { CallbackID, Capacitor } from '@capacitor/core';
+import { Geolocation } from '@capacitor/geolocation';
 
 import {
   AngularFireStorage,
@@ -29,6 +31,8 @@ export interface imgFile {
   styleUrls: ['./dashboard.page.scss'],
 })
 export class DashboardPage implements OnInit {
+  // coordinate attribute
+  coordinate: any;
   userID: string;
   userEmail: string;
   message: string;
@@ -69,7 +73,8 @@ export class DashboardPage implements OnInit {
     private actionSheetController: ActionSheetController,
     private afs: AngularFirestore,
     private afStorage: AngularFireStorage,
-    public photoService: PhotoService
+    public photoService: PhotoService,
+    private zone: NgZone
   ) {
     this.isFileUploading = false;
     this.isFileUploaded = false;
@@ -78,7 +83,33 @@ export class DashboardPage implements OnInit {
     this.files = this.filesCollection.valueChanges();
   }
 
+  // Geolocation functions
+  async requestPermissions() {
+    const permResult = await Geolocation.requestPermissions();
+    console.log('Perm request result: ', permResult);
+  }
+
+  async getCurrentCoordinate() {
+    if (!Capacitor.isPluginAvailable('Geolocation')) {
+      console.log('Plugin geolocation not available');
+      return;
+    }
+    await Geolocation.getCurrentPosition()
+      .then((data) => {
+        this.coordinate = {
+          latitude: data.coords.latitude,
+          longitude: data.coords.longitude,
+          accuracy: data.coords.accuracy,
+        };
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+
   ngOnInit() {
+    // Get coordinate in mount of component
+    this.getCurrentCoordinate();
     this.authService.userDetails().subscribe(
       (res) => {
         console.log('res', res);
@@ -97,7 +128,15 @@ export class DashboardPage implements OnInit {
       this.chats = [];
       messageSnap.forEach((messageData) => {
         console.log('messageData', messageData.val());
-        if (messageData.val().imageMessage) {
+        if (messageData.val().message === 'Mis coordenadas actuales son:') {
+          //console.log("CADA OBJETO CONTIENE LA LOCALIZACION", messageData.val());
+          this.chats.push({
+            email: messageData.val().email,
+            message: messageData.val().message,
+            latitude: messageData.val().location.latitude,
+            longitude: messageData.val().location.longitude,
+          });
+        } else if (messageData.val().imageMessage) {
           this.chats.push({
             email: messageData.val().email,
             imageMessage: crypto.AES.decrypt(
@@ -113,7 +152,7 @@ export class DashboardPage implements OnInit {
               messageData.val().message,
               this.encryptKey
             ).toString(crypto.enc.Utf8),
-            uid: messageData.val().uid,
+            uid: messageData.val().uids,
           });
         }
       });
@@ -132,10 +171,31 @@ export class DashboardPage implements OnInit {
       });
   }
 
+  //Send Location to database
+  async sendLocation() {
+    let messageToSend = {};
+    messageToSend = {
+      uid: this.userID,
+      email: this.userEmail,
+      message: 'Mis coordenadas actuales son:',
+      location: {
+        latitude: this.coordinate.latitude,
+        longitude: this.coordinate.longitude,
+      },
+    };
+    try {
+      await this.firebaseServ.sendMessage(messageToSend);
+      this.message = '';
+    } catch (e) {
+      console.log('error', e);
+    }
+  }
+
   async sendMessage() {
     let messageToSend = {};
     if (this.tmpImage !== undefined) {
       messageToSend = {
+        location: '',
         uid: this.userID,
         email: this.userEmail,
         imageMessage: crypto.AES.encrypt(
@@ -149,6 +209,7 @@ export class DashboardPage implements OnInit {
         uid: this.userID,
         email: this.userEmail,
         message: crypto.AES.encrypt(this.message, this.encryptKey).toString(),
+        location: '',
       };
     }
     try {
