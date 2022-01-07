@@ -14,6 +14,7 @@ import {
   AngularFirestoreCollection,
 } from '@angular/fire/compat/firestore';
 import * as crypto from 'crypto-js';
+import { PhotoService } from '../services/photo.service';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface imgFile {
@@ -67,7 +68,8 @@ export class DashboardPage implements OnInit {
     private firebaseServ: FirebaseService,
     private actionSheetController: ActionSheetController,
     private afs: AngularFirestore,
-    private afStorage: AngularFireStorage
+    private afStorage: AngularFireStorage,
+    public photoService: PhotoService
   ) {
     this.isFileUploading = false;
     this.isFileUploaded = false;
@@ -245,5 +247,9 @@ export class DashboardPage implements OnInit {
       .catch((err) => {
         console.log(err);
       });
+  }
+
+  addPhotoToGallery() {
+    this.photoService.addNewToGallery();
   }
 }
