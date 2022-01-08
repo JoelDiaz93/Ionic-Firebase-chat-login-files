@@ -22,7 +22,8 @@
     </ion-card-content>
     <ng-template #elseBlock>
       <ion-card-content>
-        {{chat.message}}
+        {{ chat.message }}
+        <img src="{{ chat.imageMessage }}" *ngIf="chat.imageMessage" />
       </ion-card-content>
     </ng-template>
   </ion-card>
@@ -45,7 +46,7 @@
         type="file"
         style="display: none"
         #buttonFile
-        (change)="uploadImage($event.target.files)"
+        (change)="uploadFile($event.target.files)"
       />
       <ion-fab-button (click)="addPhotoToGallery()">
         <ion-icon name="camera"></ion-icon>
