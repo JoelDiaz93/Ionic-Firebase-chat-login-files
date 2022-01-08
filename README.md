@@ -160,4 +160,24 @@ EL proyecto consta de 5 paginas y 2 servicios:
 
 ![image](https://user-images.githubusercontent.com/58042087/145654145-f9606dcb-1cac-491d-8fd6-d34917bb4b9b.png)
 
-Link de la explicacion en youtube: https://youtu.be/x72ZCEXztEw
+## APK y Bundle
+
+#### Construcción de la aplicación
+
+I) Ejecutamos el comando `ionic cap add android`. Este comando creará el directorio **android** que será la aplicación como tal para la plataforma Android (si se requiere para plataforma IOS bastaría la ejecución del comando `ionic cap add ios`).
+
+![image](https://user-images.githubusercontent.com/58191417/147428312-bb1caa15-8b53-4ff8-9995-f62349bce5c2.png)
+
+III) Realizado esto, es posible abrir el proyecto de android directamente en el IDE Android Studio con el comando `ionic cap open android`.
+
+#### Creación del APK 
+
+• Dentro de Android Studio, nos dirigimos a la ruta **Build > Build Bundle(s)/APK(s) > Build APK(s)**
+
+![image](https://user-images.githubusercontent.com/58191417/147428647-2aaaa73c-7d80-48d4-a20c-f3269f6f1a33.png)
+
+• Comenzará un proceso de Gradle y el resultado final será el archivo **apk** de la aplicación, al cual podremos acceder desde el explorador de archivos del sistema:
+
+![image](https://user-images.githubusercontent.com/58191417/147428986-93b7a32f-7fbf-46f7-a151-aa9cc95c1dfb.png)
+
+
