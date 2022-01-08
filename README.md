@@ -111,8 +111,24 @@ INSERTAR CODIGO DE FUNCIONAMIENTO DE ENVIO DE ARCHIVOS
 ![image](https://user-images.githubusercontent.com/58191417/148475007-e51d25a2-a240-4007-b190-365bf1b13165.png)
 
 ### Captura y almacenamiento de Fotos
-INSERTAR CÓDIGO DE FUNCIONAMIENTO DE CAPTURA Y ENVIO DE FOTOS
+1) En primer lugar instalamos las herramientas y plugin necesarios para poder utilizar la cámara.
 
+![image](https://user-images.githubusercontent.com/38251240/148622763-7dfd4252-0023-46ae-968a-305561c2d7d4.png)
+![image](https://user-images.githubusercontent.com/38251240/148622793-37cef28d-d77d-4864-bb3a-f24a40cfb3ab.png)
+![image](https://user-images.githubusercontent.com/38251240/148622802-15624370-1353-4b98-98ab-657cd2fef2ac.png)
+
+2) Importamos las librerías en src/main.ts
+
+![image](https://user-images.githubusercontent.com/38251240/148622878-9ccc53f8-ab08-4800-9be6-1ab79cfecf1d.png)
+
+3) Añadimos el botón de la camara en el dashboard.page.html
+
+![image](https://user-images.githubusercontent.com/38251240/148623026-afc3ecc3-c06e-4a9d-9929-32cb61b27c7a.png)
+
+4) Creamos las funciones que permitiran tomar la foto con la camara y subir a la nube mediante un servicio llamado photo.service.ts
+
+![image](https://user-images.githubusercontent.com/38251240/148623110-0b8a6fc8-2dfa-40bb-b5dc-c118f6e5707b.png)
+![image](https://user-images.githubusercontent.com/38251240/148623132-d49d41b9-92fd-430c-b693-937d91385a86.png)
 ## Funcionamiento de la aplicación
 
 ### Inicio de sesión
