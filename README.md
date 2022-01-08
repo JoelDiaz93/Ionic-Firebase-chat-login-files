@@ -89,6 +89,8 @@ ionic serve
 *Como se observa, para enviar y recibir mensajes se debe obtener la información de sesión de usuario.*
 
 ### Envío de archivos en el chat
+![image](https://user-images.githubusercontent.com/58042087/148623981-7d442332-c9bd-42d6-a89e-5485165f80f4.png)
+
 
 INSERTAR CODIGO DE FUNCIONAMIENTO DE ENVIO DE ARCHIVOS
 
